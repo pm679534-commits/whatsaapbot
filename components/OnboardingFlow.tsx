@@ -224,52 +224,54 @@ function Step2({
     setError(null)
 
     window.FB.login(
-      async (response) => {
-        if (!response.authResponse?.code) {
-          setLoading(false)
-          setError('WhatsApp qoşulması ləğv edildi. Yenidən cəhd edin.')
-          return
-        }
-
-        const { code } = response.authResponse
-
-        // Wait a short moment for the session info message to arrive
-        await new Promise((res) => setTimeout(res, 300))
-
-        if (!sessionInfoRef.current) {
-          setLoading(false)
-          setError('WhatsApp hesabı seçilmədi. Yenidən cəhd edin.')
-          return
-        }
-
-        try {
-          const res = await fetch('/api/whatsapp/connect', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              code,
-              waba_id: sessionInfoRef.current.waba_id,
-              phone_number_id: sessionInfoRef.current.phone_number_id,
-              company_name: formData.company_name,
-              owner_phone: formData.owner_phone,
-            }),
-          })
-
-          const json = (await res.json()) as { success?: boolean; tenant_id?: string; error?: string }
-
-          if (!res.ok || !json.success) {
-            throw new Error(json.error ?? 'Bilinməyən xəta')
+      (response) => {
+        void (async () => {
+          if (!response.authResponse?.code) {
+            setLoading(false)
+            setError('WhatsApp qoşulması ləğv edildi. Yenidən cəhd edin.')
+            return
           }
 
-          onNext(json.tenant_id ?? '')
-        } catch (err) {
-          setLoading(false)
-          setError(
-            err instanceof Error
-              ? err.message
-              : 'Qoşulma zamanı xəta baş verdi. Yenidən cəhd edin.'
-          )
-        }
+          const { code } = response.authResponse
+
+          // Wait a short moment for the session info message to arrive
+          await new Promise((res) => setTimeout(res, 300))
+
+          if (!sessionInfoRef.current) {
+            setLoading(false)
+            setError('WhatsApp hesabı seçilmədi. Yenidən cəhd edin.')
+            return
+          }
+
+          try {
+            const res = await fetch('/api/whatsapp/connect', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                code,
+                waba_id: sessionInfoRef.current.waba_id,
+                phone_number_id: sessionInfoRef.current.phone_number_id,
+                company_name: formData.company_name,
+                owner_phone: formData.owner_phone,
+              }),
+            })
+
+            const json = (await res.json()) as { success?: boolean; tenant_id?: string; error?: string }
+
+            if (!res.ok || !json.success) {
+              throw new Error(json.error ?? 'Bilinməyən xəta')
+            }
+
+            onNext(json.tenant_id ?? '')
+          } catch (err) {
+            setLoading(false)
+            setError(
+              err instanceof Error
+                ? err.message
+                : 'Qoşulma zamanı xəta baş verdi. Yenidən cəhd edin.'
+            )
+          }
+        })()
       },
       {
         config_id: process.env.NEXT_PUBLIC_META_CONFIG_ID,

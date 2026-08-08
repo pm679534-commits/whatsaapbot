@@ -27,7 +27,12 @@ export default function OnboardPage() {
         </Link>
         <p className="text-slate-500 text-sm hidden sm:block">
           Artıq hesabınız var?{' '}
-          <a href="https://wa.me/994000000000" className="text-emerald-400 hover:text-emerald-300">
+          <a
+            href="https://wa.me/994775250891"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-emerald-400 hover:text-emerald-300"
+          >
             Dəstəklə əlaqə
           </a>
         </p>
