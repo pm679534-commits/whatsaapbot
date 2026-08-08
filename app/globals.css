@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #080B1A;
+    color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #080B1A;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(37, 211, 102, 0.3);
+    border-radius: 3px;
+  }
+}
+
+@layer utilities {
+  .gradient-text {
+    background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gradient-text-green {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass-card {
+    background: rgba(15, 22, 41, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-nav {
+    background: rgba(8, 11, 26, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 40px rgba(37, 211, 102, 0.15), 0 0 80px rgba(37, 211, 102, 0.06);
+  }
+
+  .glow-green-hover {
+    transition: box-shadow 0.3s ease;
+  }
+
+  .glow-green-hover:hover {
+    box-shadow: 0 0 50px rgba(37, 211, 102, 0.3), 0 0 100px rgba(37, 211, 102, 0.12);
+  }
+
+  .bg-mesh {
+    background-color: #080B1A;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 10% 10%, rgba(37, 211, 102, 0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 80%, rgba(18, 140, 126, 0.06) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 50% 40%, rgba(37, 211, 102, 0.03) 0%, transparent 50%);
+  }
+
+  .input-field {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: rgba(37, 211, 102, 0.5);
+    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+  }
+
+  .input-field::placeholder {
+    color: #475569;
+  }
+
+  .input-field.error {
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  }
+}
