@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
-import Script from 'next/script'
+import FacebookSDK from '@/components/FacebookSDK'
 import './globals.css'
 
 const geistSans = Geist({
@@ -26,19 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-[family-name:var(--font-geist-sans)] antialiased">
         {children}
 
-        {/* Facebook SDK — loaded after page is interactive */}
-        <Script
-          src="https://connect.facebook.net/en_US/sdk.js"
-          strategy="afterInteractive"
-          onLoad={() => {
-            if (typeof window !== 'undefined' && window.FB) {
-              window.FB.init({
-                appId: process.env.NEXT_PUBLIC_META_APP_ID,
-                version: 'v23.0',
-              })
-            }
-          }}
-        />
+        {/* Facebook SDK — client component handles the onLoad event handler */}
+        <FacebookSDK />
       </body>
     </html>
   )
