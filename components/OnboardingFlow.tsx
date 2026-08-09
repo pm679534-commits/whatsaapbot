@@ -13,6 +13,9 @@ const step1Schema = z.object({
   owner_phone: z
     .string()
     .regex(/^\+\d{7,15}$/, 'Format: +[ölkə kodu][nömrə], nümunə: +994501234567'),
+  personal_phone: z
+    .string()
+    .regex(/^[0-9]{10,15}$/, 'Yalnız rəqəmlər, 10–15 simvol, nümunə: 994501234567'),
 })
 
 type Step1Data = z.infer<typeof step1Schema>
@@ -100,6 +103,7 @@ function Step1({
   const [values, setValues] = useState<Step1Data>({
     company_name: defaultValues.company_name ?? '',
     owner_phone: defaultValues.owner_phone ?? '+',
+    personal_phone: defaultValues.personal_phone ?? '',
   })
   const [errors, setErrors] = useState<Partial<Record<keyof Step1Data, string>>>({})
 
@@ -110,6 +114,7 @@ function Step1({
     const sanitized: Step1Data = {
       ...values,
       owner_phone: values.owner_phone.replace(/[^\d+]/g, ''),
+      personal_phone: values.personal_phone.replace(/\D/g, ''),
     }
 
     const result = step1Schema.safeParse(sanitized)
@@ -118,9 +123,21 @@ function Step1({
       setErrors({
         company_name: flat.company_name?.[0],
         owner_phone: flat.owner_phone?.[0],
+        personal_phone: flat.personal_phone?.[0],
       })
       return
     }
+
+    // Eynilik yoxlaması: hər iki nömrəni yalnız rəqəmlərə çevirib müqayisə et
+    const ownerDigits = result.data.owner_phone.replace(/\D/g, '')
+    if (ownerDigits === result.data.personal_phone) {
+      setErrors({
+        personal_phone:
+          'Şəxsi bildiriş nömrəniz biznes WhatsApp nömrənizlə eyni ola bilməz.',
+      })
+      return
+    }
+
     setErrors({})
     onNext(result.data)
   }
@@ -155,10 +172,10 @@ function Step1({
           )}
         </div>
 
-        {/* Owner phone */}
+        {/* Business WhatsApp phone */}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-2">
-            WhatsApp nömrəniz (sahibin) <span className="text-red-400">*</span>
+            Biznes WhatsApp nömrəniz <span className="text-red-400">*</span>
           </label>
           <input
             type="tel"
@@ -175,7 +192,34 @@ function Step1({
               {errors.owner_phone}
             </p>
           )}
-          <p className="mt-2 text-xs text-slate-600">Bu nömrəyə bildirişlər göndəriləcək</p>
+          <p className="mt-2 text-xs text-slate-500">
+            Bu nömrə müştərilərlə bot vasitəsilə yazışacaq (2-ci addımda Meta ilə qoşulacaq).
+          </p>
+        </div>
+
+        {/* Personal phone for notifications */}
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">
+            Sizin şəxsi WhatsApp nömrəniz (bildirişlər üçün) <span className="text-red-400">*</span>
+          </label>
+          <input
+            type="tel"
+            value={values.personal_phone}
+            onChange={(e) => setValues({ ...values, personal_phone: e.target.value })}
+            placeholder="994501234567"
+            className={`w-full px-4 py-3 rounded-xl input-field text-sm ${
+              errors.personal_phone ? 'error' : ''
+            }`}
+          />
+          {errors.personal_phone && (
+            <p className="mt-2 text-xs text-red-400 flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5" />
+              {errors.personal_phone}
+            </p>
+          )}
+          <p className="mt-2 text-xs text-slate-500">
+            AI müştəriyə cavab verə bilmədikdə, bu nömrəyə WhatsApp bildirişi gələcək.
+          </p>
         </div>
       </div>
 
@@ -301,6 +345,7 @@ function Step2({
                 phone_number_id: sessionInfo.phone_number_id,
                 company_name: formData.company_name,
                 owner_phone: formData.owner_phone,
+                personal_phone: formData.personal_phone,
               }),
             })
 
@@ -377,6 +422,21 @@ function Step2({
           🔒 Bu proses 60 saniyə çəkir. Heç bir şifrəniz bizimlə paylaşılmır.
         </p>
       </div>
+
+      {/* Trial notice */}
+      <p className="mt-5 text-xs text-slate-500 leading-relaxed text-center">
+        🎁 Bu, <span className="text-slate-300 font-medium">3 günlük pulsuz sınaq müddətidir</span>.
+        Müddəti artırmaq üçün WhatsApp:{' '}
+        <a
+          href="https://wa.me/994775250891"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#25D366] hover:underline"
+        >
+          0775250891
+        </a>{' '}
+        nömrəsi ilə əlaqə saxlayın.
+      </p>
     </div>
   )
 }

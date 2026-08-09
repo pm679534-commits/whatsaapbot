@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 const schema = z.object({
-  tenant_id: z.string().min(1),
-  catalog_text: z.string().min(1),
+  tenant_id: z.string().min(1).max(64),
+  catalog_text: z.string().min(1).max(50_000),
 })
 
 export async function POST(req: NextRequest) {
