@@ -199,16 +199,39 @@ function Step2({
   // Listen for FB Embedded Signup session info
   useEffect(() => {
     const handler = (e: MessageEvent) => {
+      // DEBUG: log every message so we can see the real structure in console
+      console.log('[WA Signup] message event —', {
+        origin: e.origin,
+        dataType: typeof e.data,
+        data: e.data,
+      })
+
+      let data: Record<string, unknown>
       try {
-        const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
-        if (data?.type === 'WA_EMBEDDED_SIGNUP' && data?.event === 'FINISH') {
-          sessionInfoRef.current = {
-            waba_id: data.data.waba_id,
-            phone_number_id: data.data.phone_number_id,
-          }
+        data = typeof e.data === 'string'
+          ? (JSON.parse(e.data) as Record<string, unknown>)
+          : (e.data as Record<string, unknown>)
+      } catch (parseErr) {
+        console.warn('[WA Signup] JSON parse failed:', parseErr)
+        return
+      }
+
+      console.log('[WA Signup] parsed data:', data)
+
+      if (data?.type === 'WA_EMBEDDED_SIGNUP' && data?.event === 'FINISH') {
+        // sessionInfoVersion:'3' → IDs are directly on data.data object
+        // Fallback: some SDK versions put them directly on data
+        const payload = (data.data ?? data) as Record<string, string>
+        const waba_id = payload.waba_id
+        const phone_number_id = payload.phone_number_id
+
+        console.log('[WA Signup] FINISH captured —', { waba_id, phone_number_id })
+
+        if (waba_id && phone_number_id) {
+          sessionInfoRef.current = { waba_id, phone_number_id }
+        } else {
+          console.error('[WA Signup] FINISH event missing IDs:', payload)
         }
-      } catch {
-        // ignore
       }
     }
     window.addEventListener('message', handler)
@@ -234,10 +257,26 @@ function Step2({
 
           const { code } = response.authResponse
 
-          // Wait a short moment for the session info message to arrive
-          await new Promise((res) => setTimeout(res, 300))
+          // Poll for session info — Meta's FINISH message can arrive
+          // before or after FB.login callback, so we retry for up to 3s
+          const sessionInfo = await new Promise<SessionInfo | null>((resolve) => {
+            if (sessionInfoRef.current) { resolve(sessionInfoRef.current); return }
+            let elapsed = 0
+            const interval = setInterval(() => {
+              elapsed += 100
+              if (sessionInfoRef.current) {
+                clearInterval(interval)
+                resolve(sessionInfoRef.current)
+              } else if (elapsed >= 3000) {
+                clearInterval(interval)
+                resolve(null)
+              }
+            }, 100)
+          })
 
-          if (!sessionInfoRef.current) {
+          console.log('[WA Signup] sessionInfo after poll:', sessionInfo)
+
+          if (!sessionInfo) {
             setLoading(false)
             setError('WhatsApp hesabı seçilmədi. Yenidən cəhd edin.')
             return
@@ -249,8 +288,8 @@ function Step2({
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 code,
-                waba_id: sessionInfoRef.current.waba_id,
-                phone_number_id: sessionInfoRef.current.phone_number_id,
+                waba_id: sessionInfo.waba_id,
+                phone_number_id: sessionInfo.phone_number_id,
                 company_name: formData.company_name,
                 owner_phone: formData.owner_phone,
               }),
