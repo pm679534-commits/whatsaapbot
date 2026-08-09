@@ -8,12 +8,19 @@ import {
   registerPhoneNumber,
 } from '@/lib/meta'
 
+// E.164: + işarəsi + 7–15 rəqəm
+const E164_REGEX = /^\+\d{7,15}$/
+
 const schema = z.object({
   code: z.string().min(1),
   waba_id: z.string().min(1),
   phone_number_id: z.string().min(1),
   company_name: z.string().min(1).max(200),
-  owner_phone: z.string().min(10),
+  // Server-side E.164 doğrulaması — frontend bypass-ına qarşı müdafiə
+  owner_phone: z
+    .string()
+    .transform((v) => v.replace(/[^\d+]/g, ''))
+    .pipe(z.string().regex(E164_REGEX, 'Yanlış telefon formatı: E.164 tələb olunur')),
 })
 
 export async function POST(req: NextRequest) {

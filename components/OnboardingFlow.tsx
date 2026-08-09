@@ -105,7 +105,14 @@ function Step1({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const result = step1Schema.safeParse(values)
+
+    // Sanitize: yalnız + və rəqəmləri saxla (boşluq, tire, mötərizə, hərfləri sil)
+    const sanitized: Step1Data = {
+      ...values,
+      owner_phone: values.owner_phone.replace(/[^\d+]/g, ''),
+    }
+
+    const result = step1Schema.safeParse(sanitized)
     if (!result.success) {
       const flat = result.error.flatten().fieldErrors
       setErrors({
