@@ -199,28 +199,30 @@ function Step2({
   // Listen for FB Embedded Signup session info
   useEffect(() => {
     const handler = (e: MessageEvent) => {
-      // DEBUG: log every message so we can see the real structure in console
-      console.log('[WA Signup] message event —', {
-        origin: e.origin,
-        dataType: typeof e.data,
-        data: e.data,
-      })
+      // Ignore non-string and non-object data early
+      if (typeof e.data !== 'string' && typeof e.data !== 'object') return
+
+      // Query-string callbacks from Facebook (e.g. "cb=...&domain=...") are not
+      // WA_EMBEDDED_SIGNUP events — skip them silently without logging or throwing
+      if (typeof e.data === 'string' && !e.data.trimStart().startsWith('{')) return
 
       let data: Record<string, unknown>
       try {
         data = typeof e.data === 'string'
           ? (JSON.parse(e.data) as Record<string, unknown>)
           : (e.data as Record<string, unknown>)
-      } catch (parseErr) {
-        console.warn('[WA Signup] JSON parse failed:', parseErr)
+      } catch {
+        // Not JSON — ignore silently
         return
       }
 
-      console.log('[WA Signup] parsed data:', data)
+      // Only handle WA_EMBEDDED_SIGNUP events
+      if (data?.type !== 'WA_EMBEDDED_SIGNUP') return
 
-      if (data?.type === 'WA_EMBEDDED_SIGNUP' && data?.event === 'FINISH') {
-        // sessionInfoVersion:'3' → IDs are directly on data.data object
-        // Fallback: some SDK versions put them directly on data
+      console.log('[WA Signup] event received:', data)
+
+      if (data.event === 'FINISH') {
+        // sessionInfoVersion:'3' puts IDs on data.data; older versions put them on data directly
         const payload = (data.data ?? data) as Record<string, string>
         const waba_id = payload.waba_id
         const phone_number_id = payload.phone_number_id
@@ -230,7 +232,7 @@ function Step2({
         if (waba_id && phone_number_id) {
           sessionInfoRef.current = { waba_id, phone_number_id }
         } else {
-          console.error('[WA Signup] FINISH event missing IDs:', payload)
+          console.error('[WA Signup] FINISH missing IDs — full payload:', payload)
         }
       }
     }
