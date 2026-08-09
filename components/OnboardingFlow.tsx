@@ -12,7 +12,7 @@ const step1Schema = z.object({
   company_name: z.string().min(2, 'Şirkətin adı ən az 2 simvol olmalıdır'),
   owner_phone: z
     .string()
-    .regex(/^\+994\d{9}$/, 'Format: +994XXXXXXXXX (9 rəqəm)'),
+    .regex(/^\+\d{7,15}$/, 'Format: +[ölkə kodu][nömrə], nümunə: +994501234567'),
 })
 
 type Step1Data = z.infer<typeof step1Schema>
@@ -99,7 +99,7 @@ function Step1({
 }) {
   const [values, setValues] = useState<Step1Data>({
     company_name: defaultValues.company_name ?? '',
-    owner_phone: defaultValues.owner_phone ?? '+994',
+    owner_phone: defaultValues.owner_phone ?? '+',
   })
   const [errors, setErrors] = useState<Partial<Record<keyof Step1Data, string>>>({})
 
