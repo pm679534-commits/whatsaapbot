@@ -34,7 +34,7 @@ declare global {
           config_id: string | undefined
           response_type: string
           override_default_response_type: boolean
-          extras: { sessionInfoVersion: string }
+          extras: { setup: object; featureType: string; sessionInfoVersion: string }
         }
       ) => void
     }
@@ -318,7 +318,7 @@ function Step2({
         config_id: process.env.NEXT_PUBLIC_META_CONFIG_ID,
         response_type: 'code',
         override_default_response_type: true,
-        extras: { sessionInfoVersion: '3' },
+        extras: { setup: {}, featureType: '', sessionInfoVersion: '3' },
       }
     )
   }, [formData, onNext])
