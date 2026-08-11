@@ -1,11 +1,27 @@
 const GRAPH_VERSION = 'v23.0'
 const BASE = `https://graph.facebook.com/${GRAPH_VERSION}`
 
+// ─── Startup validation ──────────────────────────────────────────────────────
+// Fail fast with a clear message rather than a cryptic Meta API error later.
+const META_APP_ID = process.env.NEXT_PUBLIC_META_APP_ID
+const META_APP_SECRET = process.env.META_APP_SECRET
+
+if (!META_APP_ID) {
+  throw new Error(
+    'Missing env var: NEXT_PUBLIC_META_APP_ID — add it to .env.local and to Vercel.'
+  )
+}
+if (!META_APP_SECRET) {
+  throw new Error(
+    'Missing env var: META_APP_SECRET — add it to .env.local and to Vercel.'
+  )
+}
+
 /** Exchange a short-lived auth code for an access token. */
 export async function exchangeCodeForToken(code: string): Promise<string> {
   const url = new URL(`${BASE}/oauth/access_token`)
-  url.searchParams.set('client_id', process.env.META_APP_ID!)
-  url.searchParams.set('client_secret', process.env.META_APP_SECRET!)
+  url.searchParams.set('client_id', META_APP_ID)
+  url.searchParams.set('client_secret', META_APP_SECRET)
   url.searchParams.set('code', code)
 
   const res = await fetch(url.toString())
