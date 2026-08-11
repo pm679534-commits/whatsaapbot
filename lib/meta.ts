@@ -3,8 +3,8 @@ const BASE = `https://graph.facebook.com/${GRAPH_VERSION}`
 
 // ─── Startup validation ──────────────────────────────────────────────────────
 // Fail fast with a clear message rather than a cryptic Meta API error later.
-const META_APP_ID = process.env.NEXT_PUBLIC_META_APP_ID
-const META_APP_SECRET = process.env.META_APP_SECRET
+const META_APP_ID = process.env.NEXT_PUBLIC_META_APP_ID ?? ''
+const META_APP_SECRET = process.env.META_APP_SECRET ?? ''
 
 if (!META_APP_ID) {
   throw new Error(
