@@ -70,7 +70,7 @@ export default function SuccessPage() {
             {/* CTA buttons */}
             <div className="flex flex-col gap-3">
               <a
-                href="https://wa.me/994000000000"
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '994775250891'}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20c45b] text-white font-semibold text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-[0_0_25px_rgba(37,211,102,0.4)]"

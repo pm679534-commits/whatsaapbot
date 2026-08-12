@@ -94,7 +94,9 @@ export default function FAQ() {
           <p className="text-slate-400">
             Cavab tapa bilməsəniz,{' '}
             <a
-              href="https://wa.me/994000000000"
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '994775250891'}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2"
             >
               WhatsApp üzərindən yazın
